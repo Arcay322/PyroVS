@@ -1,4 +1,5 @@
 import Pyro4
+import os
 
 @Pyro4.expose
 class FactorialServer:
@@ -11,12 +12,12 @@ class FactorialServer:
             return n * self.factorial(n - 1)
 
 def start_server():
-    port = 5000  # Establecer un puerto
+    port = int(os.environ.get("PORT", 5000))  # Usar el puerto proporcionado por Render
     daemon = Pyro4.Daemon(port=port)  # Iniciar el servidor Pyro en el puerto especificado
     uri = daemon.register(FactorialServer)  # Registrar el objeto remoto
 
-    # Localizar el servicio de nombres
-    ns = Pyro4.locateNS(host='127.0.0.1', port=9090)  
+    # Registra el servicio de nombres en el host 0.0.0.0
+    ns = Pyro4.locateNS(host='0.0.0.0', port=9090)  
     ns.register("example.factorial", uri)  # Registrar el objeto con un nombre
 
     print("Servidor de factorial listo en puerto", port)
